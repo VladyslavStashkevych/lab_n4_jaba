@@ -1,10 +1,12 @@
 import java.lang.*;
+import java.util.Scanner;
 
 public class Sudoku {
     /* Java program for Sudoku generator */
     int[][] matrix;
     int[][] resolution;
     int K; // No. Of missing digits
+    boolean gameEnded;
 
     // Constructor
     Sudoku(int K) {
@@ -56,6 +58,7 @@ public class Sudoku {
                 while (!unUsedInBox(row, col, num));
 
                 matrix[row + i][col + j] = num;
+                resolution[row + i][col + j] = num;
             }
         }
     }
@@ -102,7 +105,7 @@ public class Sudoku {
             if (j < 3)
                 j = 3;
         } else if (i < 6) {
-            if (j == (int) (i / 3) * 3)
+            if (j == (i / 3) * 3)
                 j = j + 3;
         } else {
             if (j == 6) {
@@ -121,6 +124,7 @@ public class Sudoku {
                     return true;
 
                 resolution[i][j] = 0;
+                matrix[i][j] = 0;
             }
         }
         return false;
@@ -145,22 +149,50 @@ public class Sudoku {
         }
     }
 
+    public void gameRound() {
+        Scanner scanner = new Scanner(System.in);
+        while (!gameEnded) {
+            System.out.print("Enter cell number\n >>> ");
+            int i = scanner.nextInt();
+
+            System.out.print("Enter number to insert\n >>> ");
+            int num = scanner.nextInt();
+
+            boolean check = changeCellNumber(i, num);
+            if (check && !gameEnded) {
+                printSudoku();
+            } else {
+                System.out.println("You're wrong!!! Loser");
+            }
+        }
+        scanner.close();
+    }
+
     public boolean changeCellNumber(int n, int num) {
         int count = 0;
         boolean res = false;
-        for (int i = 0; i < 9; i++) {
+
+        for (int i = 0; i < 9 && !res; i++) {
             for (int j = 0; j < 9; j++) {
                 if (resolution[i][j] == 0) {
                     count++;
                     if (count == n) {
                         res = num == matrix[i][j];
-                        resolution[i][i] = res ? num : 0;
+                        resolution[i][j] = res ? num : 0;
+                        K = res ? K - 1 : K;
+                        if (K == 0)
+                            victory();
                         break;
                     }
                 }
             }
         }
         return res;
+    }
+
+    public void victory() {
+        System.out.println("Great game! VICTORY!");
+        gameEnded = true;
     }
 
     // Print sudoku
